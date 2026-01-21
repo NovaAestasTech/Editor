@@ -22,7 +22,7 @@ import "@/components/tiptap-node/table-node/styles/table-node.scss";
 import "@/components/tiptap-node/list-node/list-node.scss";
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss";
 import { ResetAllFormattingButton } from "./tiptap-ui/reset-all-formatting-button";
-import { ListButton } from "./tiptap-ui/list-button";
+
 import Heading from "@tiptap/extension-heading";
 import { TurnIntoDropdown } from "@/components/tiptap-ui/turn-into-dropdown";
 
@@ -107,6 +107,34 @@ const Tiptap = () => {
                 <TextAlignButton editor={editor} align="center" />
                 <TextAlignButton editor={editor} align="right" />
                 <TextAlignButton editor={editor} align="justify" />
+              </div>
+              <div className="w-px h-6 bg-slate-300 mx-1" />
+
+              <div className="flex items-center gap-0.5 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
+                <button
+                  onClick={() => editor.chain().focus().toggleBold().run()}
+                  className={`text-black  ${editor.isActive("bold") ? "bg-gray-200" : ""}`}
+                >
+                  B
+                </button>
+              </div>
+              <div className="w-px h-6 bg-slate-300 mx-1" />
+              <div className="flex items-center gap-0.5 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
+                <button
+                  onClick={() => editor.chain().focus().toggleItalic().run()}
+                  className={`text-black ${editor.isActive("italic") ? "is-active" : ""}`}
+                >
+                  Italic
+                </button>
+              </div>
+              <div className="w-px h-6 bg-slate-300 mx-1" />
+              <div className="flex items-center gap-0.5 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
+                <button
+                  onClick={() => editor.chain().focus().toggleUnderline().run()}
+                  className={`text-black ${editor.isActive("underline") ? "is-active" : ""}`}
+                >
+                  Underline
+                </button>
               </div>
               <div className="w-px h-6 bg-slate-300 mx-1" />
 
