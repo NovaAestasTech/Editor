@@ -1,5 +1,6 @@
-import Tiptap from "@/components/Tiptap";
+import { AiMenuExample } from "@/components/Tiptap";
 
 export default function Home() {
-  return <Tiptap />;
+  
+  return <AiMenuExample />;
 }
