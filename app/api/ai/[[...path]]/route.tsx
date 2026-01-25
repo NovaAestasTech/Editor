@@ -99,11 +99,17 @@ export async function POST(request: NextRequest) {
               // Gemini returns an array of response objects
               const jsonArray = JSON.parse(fullResponse);
               
-              // Extract and stream text from each chunk
+              // Extract and stream text from each chunk with delay for typewriter effect
               for (const chunk of jsonArray) {
                 const textContent = chunk.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (textContent) {
-                  controller.enqueue(encoder.encode(textContent));
+                  // Split into words and stream with small delays
+                  const words = textContent.split(/(\s+)/);
+                  for (const word of words) {
+                    controller.enqueue(encoder.encode(word));
+                    // Small delay between words (20ms = ~50 words/sec, feels natural)
+                    await new Promise(resolve => setTimeout(resolve, 20));
+                  }
                 }
               }
             } catch (parseError) {
