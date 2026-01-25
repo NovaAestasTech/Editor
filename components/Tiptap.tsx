@@ -31,6 +31,7 @@ import { AiMenu } from "@/components/tiptap-ui/ai-menu";
 import { AiAskButton } from "@/components/tiptap-ui/ai-ask-button";
 import { ButtonGroup } from "@/components/tiptap-ui-primitive/button";
 import Heading from "@tiptap/extension-heading";
+import Underline from "@tiptap/extension-underline";
 import { TurnIntoDropdown } from "@/components/tiptap-ui/turn-into-dropdown";
 export const AiMenuExample = () => {
   return (
@@ -74,6 +75,7 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
       TextStyle,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Highlight.configure({ multicolor: true }),
+      Underline,
       Image,
       Ai.configure({
         appId: "123",

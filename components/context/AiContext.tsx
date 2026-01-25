@@ -17,7 +17,7 @@ export const AiProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Simulate 'auth' success immediately since we are using our own key
-    setAiToken("AIzaSyCptxzJRtAHORkke8k93GEMC4ifN3ySdPo");
+    setAiToken("authenticated");
   }, []);
 
   const generate = async (prompt: string, textContext?: string) => {
