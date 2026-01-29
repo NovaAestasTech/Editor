@@ -33,6 +33,8 @@ import { ButtonGroup } from "@/components/tiptap-ui-primitive/button";
 import Heading from "@tiptap/extension-heading";
 import Underline from "@tiptap/extension-underline";
 import { TurnIntoDropdown } from "@/components/tiptap-ui/turn-into-dropdown";
+import { tempStore } from "@/app/lib/tempStore";
+import { useEffect, useState } from "react";
 export const AiMenuExample = () => {
   return (
     <AiProvider>
@@ -51,105 +53,96 @@ const AiEditorWrapper = () => {
 };
 
 const Tiptap = ({ aiToken }: { aiToken: string }) => {
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: false,
-        horizontalRule: false,
-      }),
+  const [initialContent, setInitialContent] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
-      Heading.configure({
-        levels: [1, 2, 3, 4, 5, 6],
-      }),
-      HorizontalRule,
-      TableKit.configure({
-        table: {
-          resizable: true,
-        },
-      }),
-      Selection,
-      UiState,
-      TableHandleExtension,
-      NodeAlignment,
-      NodeBackground,
-      TextStyle,
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
-      Highlight.configure({ multicolor: true }),
-      Underline,
-      Image,
-      Ai.configure({
-        appId: "123",
-        token: aiToken,
-        autocompletion: false,
-        baseUrl: "/api/ai",
-        showDecorations: true,
-        hideDecorationsOnStreamEnd: false,
-        onLoading: (context) => {
-          context.editor.commands.aiGenerationSetIsLoading(true);
-          context.editor.commands.aiGenerationHasMessage(false);
-        },
-        onChunk: (context) => {
-          context.editor.commands.aiGenerationSetIsLoading(true);
-          context.editor.commands.aiGenerationHasMessage(true);
-        },
-        onSuccess: (context) => {
-          const hasMessage = !!context.response;
-          context.editor.commands.aiGenerationSetIsLoading(false);
-          context.editor.commands.aiGenerationHasMessage(hasMessage);
-        },
-      }),
-    ],
+  useEffect(() => {
+    async function loadContent() {
+      try {
+        const res = await fetch("/api/ai/test-api");
+        const data = await res.json();
+        setInitialContent(data.content);
+      } catch (err) {
+        console.log(err);
 
-    content: `
-      <p><strong>Project Title: AI-Powered Personalized Route Planner</strong></p>
-    <p><strong>Description:</strong></p>
-    <p><strong>This project is a full-stack AI-powered travel planner that generates personalized travel routes</strong>
-    <strong>based on user preferences and duration of the trip. Built using Next.js (React) and TypeScript on</strong>
-    <strong>the frontend, with a FastAPI backend and styled using Tailwind CSS, the application delivers a</strong>
-    <strong>seamless and modern user experience.</strong></p>
-    <p><strong>Users can specify how many days they want to spend at a location and select their areas of interest</strong>
-    <strong>(such as culture, adventure, food, nature, etc.). The system then uses AI algorithms to analyze and</strong>
-    <strong>return a ranked list of the top 10 places to visit, optimized to match the user's interests and fit</strong>
-    <strong>within the available timeframe. Each destination is plotied on an interacive map with the ideal</strong>
-    <strong>route marked between them, offering a complete and efficient travel plan.</strong></p>
-    <p><strong>Key Features:</strong></p>
-    <ul>
-    <li>
-    <p><strong>Frontend: Built with Next.js and TypeScript for fast, SEO-friendly, and scalable UI.</strong></p>
-    </li>
-    <li>
-    <p><strong>Backend: FastAPI powers the backend with efficient AI-driven route and place</strong>
-    <strong>recommendations.</strong></p>
-    </li>
-    <li>
-    <p><strong>Styling: Tailwind CSS provides a responsive and modern design.</strong></p>
-    </li>
-    <li>
-    <p><strong>Smart Itinerary Generation: AI optimizes suggestions based on user input and location</strong>
-    <strong>data.</strong></p>
-    </li>
-    <li>
-    <p><strong>Interacive Map Integration: Visual representation of routes and destinations with</strong>
-    <strong>geolocation support.</strong></p>
-    </li>
-    <li>
-    <p><strong>Custom Filters: Allows users to fine-tune their travel experience based on selected</strong>
-    <strong>interests.</strong></p>
-    </li>
-    </ul>
+        setInitialContent(tempStore.content || "");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadContent();
+  }, []);
 
-    `,
-    immediatelyRender: false,
-    editorProps: {
-      attributes: {
-        class:
-          "tiptap prose max-w-none min-h-[300px] p-8 focus:outline-none text-slate-900",
+  const editor = useEditor(
+    {
+      extensions: [
+        StarterKit.configure({
+          heading: false,
+          horizontalRule: false,
+        }),
+
+        Heading.configure({
+          levels: [1, 2, 3, 4, 5, 6],
+        }),
+        HorizontalRule,
+        TableKit.configure({
+          table: {
+            resizable: true,
+          },
+        }),
+        Selection,
+        UiState,
+        TableHandleExtension,
+        NodeAlignment,
+        NodeBackground,
+        TextStyle,
+        TextAlign.configure({ types: ["heading", "paragraph"] }),
+        Highlight.configure({ multicolor: true }),
+        Underline,
+        Image,
+        Ai.configure({
+          appId: "123",
+          token: aiToken,
+          autocompletion: false,
+          baseUrl: "/api/ai/catch",
+          showDecorations: true,
+          hideDecorationsOnStreamEnd: false,
+          onLoading: (context) => {
+            context.editor.commands.aiGenerationSetIsLoading(true);
+            context.editor.commands.aiGenerationHasMessage(false);
+          },
+          onChunk: (context) => {
+            context.editor.commands.aiGenerationSetIsLoading(true);
+            context.editor.commands.aiGenerationHasMessage(true);
+          },
+          onSuccess: (context) => {
+            const hasMessage = !!context.response;
+            context.editor.commands.aiGenerationSetIsLoading(false);
+            context.editor.commands.aiGenerationHasMessage(hasMessage);
+          },
+        }),
+      ],
+
+      content: `${initialContent}`,
+      immediatelyRender: false,
+      editorProps: {
+        attributes: {
+          class:
+            "tiptap prose max-w-none min-h-[300px] p-8 focus:outline-none text-slate-900",
+        },
       },
+      editable: true,
     },
-    editable: true,
-  });
+    [initialContent],
+  );
 
-  if (!editor) return null;
+  if (isLoading || !editor) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-slate-600">Loading editor...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen bg-slate-50 p-4">
