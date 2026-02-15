@@ -35,6 +35,8 @@ import Underline from "@tiptap/extension-underline";
 import { TurnIntoDropdown } from "@/components/tiptap-ui/turn-into-dropdown";
 import { tempStore } from "@/app/lib/tempStore";
 import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Loader2, Sparkles } from "lucide-react";
 export const AiMenuExample = () => {
   return (
     <AiProvider>
@@ -154,7 +156,7 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            text: initialContent,
+            text: editor?.getText(),
           }),
         },
       );
@@ -175,7 +177,23 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
           <span className="text-sm font-bold text-slate-500 uppercase tracking-tighter">
             Document Editor
           </span>
-          <Button onClick={() => Summarizeit()}>Summarize</Button>
+          <Button
+            onClick={Summarizeit}
+            disabled={isLoading}
+            className="flex items-center gap-2 bg-gradient-to-r hover:opacity-90 text-white shadow-md"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Summarizing...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4" />
+                Summarize
+              </>
+            )}
+          </Button>
         </div>
 
         <div className="bg-white rounded-xl border-2 border-slate-200 shadow-xl overflow-hidden focus-within:border-blue-500 transition-colors">
@@ -286,7 +304,6 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
         <Card className="mt-8 border-indigo-200 shadow-lg bg-gradient-to-br from-indigo-50 to-purple-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-indigo-700">
-              <Sparkles className="w-5 h-5" />
               AI Summary
             </CardTitle>
           </CardHeader>
