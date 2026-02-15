@@ -29,7 +29,7 @@ import { Selection } from "@tiptap/extensions";
 import { useAi, AiProvider } from "./context/AiContext";
 import { AiMenu } from "@/components/tiptap-ui/ai-menu";
 import { AiAskButton } from "@/components/tiptap-ui/ai-ask-button";
-import { ButtonGroup } from "@/components/tiptap-ui-primitive/button";
+import { Button, ButtonGroup } from "@/components/tiptap-ui-primitive/button";
 import Heading from "@tiptap/extension-heading";
 import Underline from "@tiptap/extension-underline";
 import { TurnIntoDropdown } from "@/components/tiptap-ui/turn-into-dropdown";
@@ -54,6 +54,7 @@ const AiEditorWrapper = () => {
 
 const Tiptap = ({ aiToken }: { aiToken: string }) => {
   const [initialContent, setInitialContent] = useState<string>("");
+  const [summarizerContent, setsummarizerContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -143,7 +144,30 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
       </div>
     );
   }
-
+  const Summarizeit = async () => {
+    try {
+      const data = await fetch(
+        `https://3t3rnal-summarizer-hf.hf.space/summarize/text`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text: initialContent,
+          }),
+        },
+      );
+      const result = await data.json();
+      setsummarizerContent(result.summary);
+    } catch (e) {
+      if (e instanceof Error) {
+        console.log(e.message);
+      } else {
+        throw new Error("Unidentified Error");
+      }
+    }
+  };
   return (
     <div className="flex flex-col justify-center items-center min-h-screen bg-slate-50 p-4">
       <div className="w-full max-w-3xl">
@@ -151,6 +175,7 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
           <span className="text-sm font-bold text-slate-500 uppercase tracking-tighter">
             Document Editor
           </span>
+          <Button onClick={() => Summarizeit()}>Summarize</Button>
         </div>
 
         <div className="bg-white rounded-xl border-2 border-slate-200 shadow-xl overflow-hidden focus-within:border-blue-500 transition-colors">
@@ -257,6 +282,22 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
           </EditorContext.Provider>
         </div>
       </div>
+      {summarizerContent && (
+        <Card className="mt-8 border-indigo-200 shadow-lg bg-gradient-to-br from-indigo-50 to-purple-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-indigo-700">
+              <Sparkles className="w-5 h-5" />
+              AI Summary
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            <div className="prose max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap">
+              {summarizerContent}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
