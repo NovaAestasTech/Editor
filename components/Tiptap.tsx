@@ -37,6 +37,8 @@ import { tempStore } from "@/app/lib/tempStore";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Loader2, Sparkles } from "lucide-react";
+import { Skeleton } from "./ui/skeleton";
+
 export const AiMenuExample = () => {
   return (
     <AiProvider>
@@ -58,6 +60,7 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
   const [initialContent, setInitialContent] = useState<string>("");
   const [summarizerContent, setsummarizerContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isSummarizing, setIsSummarizing] = useState(false);
 
   useEffect(() => {
     async function loadContent() {
@@ -148,6 +151,7 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
   }
   const Summarizeit = async () => {
     try {
+      setIsSummarizing(true);
       const data = await fetch(
         `https://3t3rnal-summarizer-hf.hf.space/summarize/text`,
         {
@@ -168,6 +172,8 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
       } else {
         throw new Error("Unidentified Error");
       }
+    } finally {
+      setIsSummarizing(false);
     }
   };
   return (
@@ -179,7 +185,7 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
           </span>
           <Button
             onClick={Summarizeit}
-            disabled={isLoading}
+            disabled={isSummarizing}
             className="flex items-center gap-2 bg-gradient-to-r hover:opacity-90 text-white shadow-md"
           >
             {isLoading ? (
@@ -300,21 +306,34 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
           </EditorContext.Provider>
         </div>
       </div>
-      {summarizerContent && (
-        <Card className="mt-8 border-indigo-200 shadow-lg bg-gradient-to-br from-indigo-50 to-purple-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-indigo-700">
-              AI Summary
-            </CardTitle>
-          </CardHeader>
+      <Card className="mt-8 w-full border-indigo-200 shadow-lg bg-gradient-to-br from-indigo-50 to-purple-50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-indigo-700">
+            AI Summary
+          </CardTitle>
+        </CardHeader>
 
-          <CardContent>
+        <CardContent>
+          {isSummarizing ? (
+            // 🔄 Loading Skeleton
+            <div className="space-y-3 animate-pulse">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-[90%]" />
+              <Skeleton className="h-4 w-[85%]" />
+              <Skeleton className="h-4 w-[95%]" />
+              <Skeleton className="h-4 w-[80%]" />
+            </div>
+          ) : summarizerContent ? (
             <div className="prose max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap">
               {summarizerContent}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <div className="text-slate-400 italic">
+              Click Summarize to generate an AI summary of your document.
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
