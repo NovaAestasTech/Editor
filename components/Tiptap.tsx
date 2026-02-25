@@ -29,13 +29,14 @@ import { Selection } from "@tiptap/extensions";
 import { useAi, AiProvider } from "./context/AiContext";
 import { AiMenu } from "@/components/tiptap-ui/ai-menu";
 import { AiAskButton } from "@/components/tiptap-ui/ai-ask-button";
-import { Button, ButtonGroup } from "@/components/tiptap-ui-primitive/button";
+import { ButtonGroup } from "@/components/tiptap-ui-primitive/button";
 import Heading from "@tiptap/extension-heading";
 import Underline from "@tiptap/extension-underline";
 import { TurnIntoDropdown } from "@/components/tiptap-ui/turn-into-dropdown";
 import { tempStore } from "@/app/lib/tempStore";
 import { useEffect, useState } from "react";
-
+import { generateHTML } from "@tiptap/react";
+import { tiptapExtensionsServer } from "@/lib/tiptapExtensions";
 import {
   Loader2,
   Sparkles,
@@ -227,15 +228,17 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
   const summaryPanelShadow = darkMode
     ? "0 2px 8px rgba(0,0,0,0.2)"
     : "0 2px 8px rgba(0,0,0,0.06)";
+
   const exportTodocx = async () => {
     try {
+      const html = generateHTML(editor.getJSON(), tiptapExtensionsServer);
       const res = await fetch("api/ai/export-docx", {
         method: "POST",
         headers: {
           "Content-type": "application/json",
         },
         body: JSON.stringify({
-          content: editor.getJSON(),
+          content: html,
           filename: "Document",
         }),
       });
