@@ -64,6 +64,7 @@ const AiEditorWrapper = () => {
 };
 
 const Tiptap = ({ aiToken }: { aiToken: string }) => {
+  const [checkLogic, setCheckLogic] = useState(false);
   const [initialContent, setInitialContent] = useState<string>("");
   const [summarizerContent, setsummarizerContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
@@ -229,6 +230,43 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
     ? "0 2px 8px rgba(0,0,0,0.2)"
     : "0 2px 8px rgba(0,0,0,0.06)";
 
+  const handleLogicCheck = async () => {
+    setCheckLogic(true);
+    try {
+      const res = await fetch("/api/ai/checks/crossCheck", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: editor.getText(),
+        }),
+      });
+
+      const data = await res.json();
+      
+      const statements = data.statements || [];
+      if (statements.length === 0) {
+        alert("✓ No logical inconsistencies found!");
+      } else {
+        // Format results for user display
+        const issues = statements
+          .map((s: any, i: number) => `${i + 1}. ${s.text}\n   → ${s.description}`)
+          .join("\n\n");
+        alert(`⚠ Logical Issues Found:\n\n${issues}`);
+      }
+    } catch (e) {
+      if (e instanceof Error) {
+        alert(`Error checking logic: ${e.message}`);
+        console.error(e.message);
+      } else {
+        alert("An unknown error occurred while checking logic.");
+      }
+    } finally {
+      setCheckLogic(false);
+    }
+  };
+
   const exportTodocx = async () => {
     try {
       const html = generateHTML(editor.getJSON(), tiptapExtensionsServer);
@@ -372,6 +410,30 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
 
           {/* Right — Summarize + Theme toggle + Panel toggle */}
           <div className="flex items-center gap-2 shrink-0 ml-2">
+            {/* cross check button */}
+            <button
+              onClick={handleLogicCheck}
+              disabled={checkLogic}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white shadow-sm"
+              style={{
+                background: checkLogic 
+                  ? "#75716f"
+                  : "linear-gradient(135deg, #dd350c, #f56744)",
+                opacity: checkLogic ? 0.7 : 1,
+                transition: "opacity 0.2s ease, transform 0.15s ease",
+              }}
+              onMouseEnter={(e) =>
+                !checkLogic && (e.currentTarget.style.transform = "scale(1.03)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "scale(1)")
+              }
+            >
+              {checkLogic ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : null}
+              {checkLogic ? "Checking…" : "! Logical Check"}
+            </button>
             <button
               onClick={() => exportTodocx()}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white shadow-sm"
