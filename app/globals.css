@@ -181,3 +181,64 @@
 .ProseMirror tr:nth-child(even) td {
   background-color: #fafafa !important; /* subtle zebra striping */
 }
+
+/* Logical Issue Highlights */
+.logical-issue-highlight {
+  background-color: rgba(254, 202, 202, 0.3) !important;
+  border-bottom: 2px solid rgba(239, 68, 68, 0.5) !important;
+  cursor: pointer !important;
+  border-radius: 3px !important;
+  padding: 2px 1px !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+}
+
+.logical-issue-highlight:hover {
+  background-color: rgba(254, 202, 202, 0.5) !important;
+  border-bottom-color: rgba(239, 68, 68, 0.7) !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15) !important;
+}
+
+/* Dark mode styles for logical issue highlights */
+.dark .logical-issue-highlight {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  border-bottom: 2px solid rgba(239, 68, 68, 0.4) !important;
+}
+
+.dark .logical-issue-highlight:hover {
+  background-color: rgba(239, 68, 68, 0.25) !important;
+  border-bottom-color: rgba(239, 68, 68, 0.6) !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Custom scrollbar styles for webkit browsers */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 8px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Dark mode scrollbar */
+.dark .overflow-y-auto::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.dark .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}

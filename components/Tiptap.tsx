@@ -44,7 +44,11 @@ import {
   PanelRightClose,
   Moon,
   Sun,
+  PanelLeftOpen,
+  PanelLeftClose,
+  AlertCircle,
 } from "lucide-react";
+import { LogicalIssue } from "@/components/tiptap-extension/logical-issue-extension";
 
 export const AiMenuExample = () => {
   return (
@@ -72,6 +76,9 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
   const [showSummary, setShowSummary] = useState(false);
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
+  
+  const [logicalIssues, setLogicalIssues] = useState<Array<{ text: string; description: string }>>([]);
+  const [showIssues, setShowIssues] = useState(false);
 
   // Sync dark class on <html> for tiptap button dark mode support
   useEffect(() => {
@@ -126,6 +133,7 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
         Highlight.configure({ multicolor: true }),
         Underline,
         Image,
+        LogicalIssue,
         Ai.configure({
           appId: "123",
           token: aiToken,
@@ -155,6 +163,14 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
         attributes: {
           class:
             "tiptap prose max-w-none min-h-[300px] focus:outline-none text-slate-900",
+        },
+        handleClick(view, pos, event) {
+          const target = event.target as HTMLElement;
+          if (target.classList.contains("logical-issue-highlight")) {
+            setShowIssues(true);
+            return true;
+          }
+          return false;
         },
       },
       editable: true,
@@ -232,6 +248,12 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
 
   const handleLogicCheck = async () => {
     setCheckLogic(true);
+    
+    // Clear previous highlights
+    if (editor) {
+      editor.chain().clearAllLogicalIssues().run();
+    }
+    
     try {
       const res = await fetch("/api/ai/checks/crossCheck", {
         method: "POST",
@@ -248,12 +270,51 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
       const statements = data.statements || [];
       if (statements.length === 0) {
         alert("✓ No logical inconsistencies found!");
+        setLogicalIssues([]);
+        setShowIssues(false);
       } else {
-        // Format results for user display
-        const issues = statements
-          .map((s: any, i: number) => `${i + 1}. ${s.text}\n   → ${s.description}`)
-          .join("\n\n");
-        alert(`⚠ Logical Issues Found:\n\n${issues}`);
+        // Store issues in state
+        setLogicalIssues(statements);
+        setShowIssues(true);
+        
+        // Highlight each statement in the editor
+        const editorText = editor.getText();
+        statements.forEach((statement: any, index: number) => {
+          const searchText = statement.text.trim();
+          const startPos = editorText.indexOf(searchText);
+          
+          if (startPos !== -1) {
+            // Find the actual position in the document
+            let currentPos = 0;
+            let found = false;
+            
+            editor.state.doc.descendants((node, pos) => {
+              if (found) return false;
+              
+              if (node.isText && node.text) {
+                const textInNode = node.text;
+                const relativePos = textInNode.indexOf(searchText);
+                
+                if (relativePos !== -1) {
+                  const from = pos + relativePos;
+                  const to = from + searchText.length;
+                  
+                  editor
+                    .chain()
+                    .setTextSelection({ from, to })
+                    .setLogicalIssue(`issue-${index}`)
+                    .run();
+                  
+                  found = true;
+                  return false;
+                }
+              }
+            });
+          }
+        });
+        
+        // Deselect text after highlighting
+        editor.commands.setTextSelection(0);
       }
     } catch (e) {
       if (e instanceof Error) {
@@ -410,6 +471,21 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
 
           {/* Right — Summarize + Theme toggle + Panel toggle */}
           <div className="flex items-center gap-2 shrink-0 ml-2">
+            {/* Issues panel toggle - only show if there are issues */}
+            {logicalIssues.length > 0 && (
+              <button
+                onClick={() => setShowIssues(!showIssues)}
+                className={`p-1.5 rounded-lg ${darkMode ? "text-neutral-400 hover:text-neutral-200 hover:bg-white/10" : "text-neutral-500 hover:text-neutral-700 hover:bg-black/5"}`}
+                style={{ transition: "all 0.2s ease" }}
+                title={showIssues ? "Hide Logical Issues" : "Show Logical Issues"}
+              >
+                {showIssues ? (
+                  <PanelLeftClose className="w-4.5 h-4.5" />
+                ) : (
+                  <PanelLeftOpen className="w-4.5 h-4.5" />
+                )}
+              </button>
+            )}
             {/* cross check button */}
             <button
               onClick={handleLogicCheck}
@@ -501,6 +577,109 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
 
         {/* ── Content area (editor + summary side-by-side) ── */}
         <div className="flex flex-1   p-4 gap-4">
+          {/* Logical Issues panel — slides in/out from LEFT */}
+          <div
+            style={{
+              width: showIssues ? "340px" : "0px",
+              minWidth: showIssues ? "340px" : "0px",
+              opacity: showIssues ? 1 : 0,
+              padding: showIssues ? undefined : "0",
+              overflow: "hidden",
+              transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+              borderRadius: "12px",
+              background: showIssues ? summaryPanelBg : "transparent",
+              boxShadow: showIssues ? summaryPanelShadow : "none",
+            }}
+          >
+            <div
+              className="h-full flex flex-col"
+              style={{
+                opacity: showIssues ? 1 : 0,
+                transform: showIssues ? "translateX(0)" : "translateX(-20px)",
+                transition: "opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s",
+              }}
+            >
+              {/* Issues header */}
+              <div
+                className="flex items-center gap-2 px-4 py-3 border-b shrink-0"
+                style={{
+                  borderColor: summaryBorder,
+                  transition: "border-color 0.4s ease",
+                }}
+              >
+                <AlertCircle className="w-4 h-4" style={{ color: "#ef4444" }} />
+                <span
+                  className={`text-sm font-semibold ${textPrimary}`}
+                  style={{ transition: "color 0.3s ease" }}
+                >
+                  Logical Issues ({logicalIssues.length})
+                </span>
+              </div>
+
+              {/* Issues content */}
+              <div 
+                className="flex-1 overflow-y-auto px-4 py-3"
+                style={{
+                  scrollbarWidth: "thin",
+                  scrollbarColor: darkMode ? "#4b5563 #1f2937" : "#d1d5db #f3f4f6",
+                }}
+              >
+                {logicalIssues.length > 0 ? (
+                  <div className="space-y-3">
+                    {logicalIssues.map((issue, index) => (
+                      <div
+                        key={index}
+                        className={`p-3 rounded-lg border ${
+                          darkMode
+                            ? "bg-red-950/20 border-red-900/30"
+                            : "bg-red-50 border-red-200"
+                        }`}
+                        style={{
+                          transition: "all 0.2s ease",
+                        }}
+                      >
+                        <div
+                          className={`text-xs font-semibold mb-1.5 ${
+                            darkMode ? "text-red-400" : "text-red-600"
+                          }`}
+                        >
+                          Issue {index + 1}
+                        </div>
+                        <div
+                          className={`text-sm mb-2 font-medium ${
+                            darkMode ? "text-neutral-200" : "text-neutral-800"
+                          }`}
+                        >
+                          {issue.text}
+                        </div>
+                        <div
+                          className={`text-xs leading-relaxed ${
+                            darkMode ? "text-neutral-400" : "text-neutral-600"
+                          }`}
+                        >
+                          → {issue.description}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div
+                    className={`flex flex-col items-center justify-center h-full text-center px-2 ${textMuted}`}
+                  >
+                    <AlertCircle className="w-8 h-8 mb-3 opacity-30" />
+                    <p className="text-sm">
+                      No logical issues found. Click{" "}
+                      <span className={`font-medium ${textSecondary}`}>
+                        Logical Check
+                      </span>{" "}
+                      to analyze your document.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Editor panel — A4 page preview */}
           <div
             className="flex-1 min-w-0 flex flex-col items-center  "
