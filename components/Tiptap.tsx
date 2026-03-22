@@ -377,7 +377,7 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
             transition: "background 0.4s ease, border-color 0.4s ease",
           }}
         >
-            <BackToDashboard />
+          
           {/* Left — Document name */}
           <span
             className={`text-sm font-semibold tracking-tight whitespace-nowrap mr-3 ${textPrimary}`}
