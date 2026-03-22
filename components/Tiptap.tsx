@@ -357,453 +357,458 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
   };
   return (
     <div
-      className={`flex  ${darkMode ? "bg-neutral-950" : "bg-neutral-200"}`}
-      style={{ animation: "fadeIn 0.5s ease-out" }}
+  className={`flex min-h-screen ${darkMode ? "bg-neutral-950" : "bg-neutral-200"}`}
+  style={{ animation: "fadeIn 0.5s ease-out" }}
+>
+  {/* Outer container — full screen */}
+  <div
+    className="w-full h-screen flex flex-col overflow-hidden"
+    style={{
+      background: bg,
+      transition: "background 0.4s ease",
+    }}
+  >
+    {/* ── Top bar ── */}
+    <div
+      className="flex items-center gap-2 px-4 py-2.5 border-b shrink-0"
+      style={{
+        borderColor: topBarBorder,
+        background: topBarBg,
+        transition: "background 0.4s ease, border-color 0.4s ease",
+      }}
     >
-      {/* Outer container — full screen */}
-      <div
-        className="w-full  flex flex-col "
-        style={{
-          background: bg,
-          transition: "background 0.4s ease",
-        }}
+      {/* Left — Document name */}
+      <span
+        className={`text-sm font-semibold tracking-tight whitespace-nowrap mr-3 ${textPrimary}`}
+        style={{ transition: "color 0.3s ease" }}
       >
-        {/* ── Top bar ── */}
-        <div
-          className="sticky top-0 z-50 flex items-center gap-2 px-4 py-2.5 border-b shrink-0"
-          style={{
-            borderColor: topBarBorder,
-            background: topBarBg,
-            transition: "background 0.4s ease, border-color 0.4s ease",
-          }}
-        >
-          
-          {/* Left — Document name */}
-          <span
-            className={`text-sm font-semibold tracking-tight whitespace-nowrap mr-3 ${textPrimary}`}
-            style={{ transition: "color 0.3s ease" }}
-          >
-            Document Editor
-          </span>
+        Document Editor
+      </span>
 
-          {/* Center — Toolbar */}
-          <EditorContext.Provider value={{ editor }}>
-            <div className="flex flex-wrap items-center gap-1 flex-1 min-w-0">
-              <div className={btnGroupCls}>
-                <TurnIntoDropdown
-                  editor={editor}
-                  hideWhenUnavailable={false}
-                  blockTypes={[
-                    "paragraph",
-                    "heading",
-                    "bulletList",
-                    "orderedList",
-                  ]}
-                  useCardLayout={true}
-                  onOpenChange={(isOpen) =>
-                    console.log("Dropdown toggled:", isOpen)
-                  }
-                />
-              </div>
-              <div className={dividerCls} />
-
-              <div className={btnGroupCls}>
-                <TextAlignButton editor={editor} align="left" />
-                <TextAlignButton editor={editor} align="center" />
-                <TextAlignButton editor={editor} align="right" />
-                <TextAlignButton editor={editor} align="justify" />
-              </div>
-              <div className={dividerCls} />
-
-              <div className={btnGroupCls}>
-                <ButtonGroup orientation="horizontal">
-                  <AiAskButton />
-                </ButtonGroup>
-              </div>
-              <div className={dividerCls} />
-
-              <div className={btnGroupCls}>
-                <button
-                  onClick={() => editor.chain().focus().toggleBold().run()}
-                  className={`${inlineBtnText} px-1.5 py-0.5 rounded text-sm font-bold ${editor.isActive("bold") ? inlineBtnActive : inlineBtnHover}`}
-                >
-                  B
-                </button>
-              </div>
-              <div className={dividerCls} />
-
-              <div className={btnGroupCls}>
-                <button
-                  onClick={() => editor.chain().focus().toggleItalic().run()}
-                  className={`${inlineBtnText} px-1.5 py-0.5 rounded text-sm italic ${editor.isActive("italic") ? inlineBtnActive : inlineBtnHover}`}
-                >
-                  I
-                </button>
-              </div>
-              <div className={dividerCls} />
-
-              <div className={btnGroupCls}>
-                <button
-                  onClick={() => editor.chain().focus().toggleUnderline().run()}
-                  className={`${inlineBtnText} px-1.5 py-0.5 rounded text-sm underline ${editor.isActive("underline") ? inlineBtnActive : inlineBtnHover}`}
-                >
-                  U
-                </button>
-              </div>
-              <div className={dividerCls} />
-
-              <div className={btnGroupCls}>
-                <UndoRedoButton editor={editor} action="undo" />
-                <UndoRedoButton editor={editor} action="redo" />
-                <ResetAllFormattingButton editor={editor} />
-              </div>
-              <div className={dividerCls} />
-
-              <div className={btnGroupCls}>
-                <TableTriggerButton
-                  editor={editor}
-                  maxRows={8}
-                  maxCols={8}
-                  text="Table"
-                />
-              </div>
-            </div>
-          </EditorContext.Provider>
-
-          {/* Right — Summarize + Theme toggle + Panel toggle */}
-          <div className="flex items-center gap-2 shrink-0 ml-2">
-            {/* Issues panel toggle - only show if there are issues */}
-            {logicalIssues.length > 0 && (
-              <button
-                onClick={() => setShowIssues(!showIssues)}
-                className={`p-1.5 rounded-lg ${darkMode ? "text-neutral-400 hover:text-neutral-200 hover:bg-white/10" : "text-neutral-500 hover:text-neutral-700 hover:bg-black/5"}`}
-                style={{ transition: "all 0.2s ease" }}
-                title={showIssues ? "Hide Logical Issues" : "Show Logical Issues"}
-              >
-                {showIssues ? (
-                  <PanelLeftClose className="w-4.5 h-4.5" />
-                ) : (
-                  <PanelLeftOpen className="w-4.5 h-4.5" />
-                )}
-              </button>
-            )}
-            {/* cross check button */}
-            <button
-              onClick={handleLogicCheck}
-              disabled={checkLogic}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white shadow-sm"
-              style={{
-                background: checkLogic 
-                  ? "#75716f"
-                  : "linear-gradient(135deg, #dd350c, #f56744)",
-                opacity: checkLogic ? 0.7 : 1,
-                transition: "opacity 0.2s ease, transform 0.15s ease",
-              }}
-              onMouseEnter={(e) =>
-                !checkLogic && (e.currentTarget.style.transform = "scale(1.03)")
+      {/* Center — Toolbar */}
+      <EditorContext.Provider value={{ editor }}>
+        <div className="flex flex-wrap items-center gap-1 flex-1 min-w-0">
+          <div className={btnGroupCls}>
+            <TurnIntoDropdown
+              editor={editor}
+              hideWhenUnavailable={false}
+              blockTypes={[
+                "paragraph",
+                "heading",
+                "bulletList",
+                "orderedList",
+              ]}
+              useCardLayout={true}
+              onOpenChange={(isOpen) =>
+                console.log("Dropdown toggled:", isOpen)
               }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
-            >
-              {checkLogic ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : null}
-              {checkLogic ? "Checking…" : "! Logical Check"}
-            </button>
-            <button
-              onClick={() => exportTodocx()}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white shadow-sm"
-              style={{
-                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+            />
+          </div>
+          <div className={dividerCls} />
 
-                transition: "opacity 0.2s ease, transform 0.15s ease",
-              }}
-            >
-              Download
-            </button>
-            <button
-              onClick={Summarizeit}
-              disabled={isSummarizing}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white shadow-sm"
-              style={{
-                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                opacity: isSummarizing ? 0.7 : 1,
-                transition: "opacity 0.2s ease, transform 0.15s ease",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.03)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
-            >
-              {isSummarizing ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Sparkles className="w-3.5 h-3.5" />
-              )}
-              {isSummarizing ? "Summarizing…" : "Summarize"}
-            </button>
+          <div className={btnGroupCls}>
+            <TextAlignButton editor={editor} align="left" />
+            <TextAlignButton editor={editor} align="center" />
+            <TextAlignButton editor={editor} align="right" />
+            <TextAlignButton editor={editor} align="justify" />
+          </div>
+          <div className={dividerCls} />
 
-            {/* Theme toggle */}
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className={`p-1.5 rounded-lg ${darkMode ? "text-neutral-400 hover:text-neutral-200 hover:bg-white/10" : "text-neutral-500 hover:text-neutral-700 hover:bg-black/5"}`}
-              style={{ transition: "all 0.2s ease" }}
-              title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            >
-              {darkMode ? (
-                <Sun className="w-4.5 h-4.5" />
-              ) : (
-                <Moon className="w-4.5 h-4.5" />
-              )}
-            </button>
+          <div className={btnGroupCls}>
+            <ButtonGroup orientation="horizontal">
+              <AiAskButton />
+            </ButtonGroup>
+          </div>
+          <div className={dividerCls} />
 
-            {/* Panel toggle */}
+          <div className={btnGroupCls}>
             <button
-              onClick={() => setShowSummary(!showSummary)}
-              className={`p-1.5 rounded-lg ${darkMode ? "text-neutral-400 hover:text-neutral-200 hover:bg-white/10" : "text-neutral-500 hover:text-neutral-700 hover:bg-black/5"}`}
-              style={{ transition: "all 0.2s ease" }}
-              title={showSummary ? "Hide AI Summary" : "Show AI Summary"}
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              className={`${inlineBtnText} px-1.5 py-0.5 rounded text-sm font-bold ${editor.isActive("bold") ? inlineBtnActive : inlineBtnHover}`}
             >
-              {showSummary ? (
-                <PanelRightClose className="w-4.5 h-4.5" />
-              ) : (
-                <PanelRightOpen className="w-4.5 h-4.5" />
-              )}
+              B
             </button>
+          </div>
+          <div className={dividerCls} />
+
+          <div className={btnGroupCls}>
+            <button
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              className={`${inlineBtnText} px-1.5 py-0.5 rounded text-sm italic ${editor.isActive("italic") ? inlineBtnActive : inlineBtnHover}`}
+            >
+              I
+            </button>
+          </div>
+          <div className={dividerCls} />
+
+          <div className={btnGroupCls}>
+            <button
+              onClick={() => editor.chain().focus().toggleUnderline().run()}
+              className={`${inlineBtnText} px-1.5 py-0.5 rounded text-sm underline ${editor.isActive("underline") ? inlineBtnActive : inlineBtnHover}`}
+            >
+              U
+            </button>
+          </div>
+          <div className={dividerCls} />
+
+          <div className={btnGroupCls}>
+            <UndoRedoButton editor={editor} action="undo" />
+            <UndoRedoButton editor={editor} action="redo" />
+            <ResetAllFormattingButton editor={editor} />
+          </div>
+          <div className={dividerCls} />
+
+          <div className={btnGroupCls}>
+            <TableTriggerButton
+              editor={editor}
+              maxRows={8}
+              maxCols={8}
+              text="Table"
+            />
           </div>
         </div>
+      </EditorContext.Provider>
 
-        {/* ── Content area (editor + summary side-by-side) ── */}
-        <div className="flex flex-1   p-4 gap-4">
-          {/* Logical Issues panel — slides in/out from LEFT */}
+      {/* Right — Actions + Theme toggle + Panel toggles */}
+      <div className="flex items-center gap-2 shrink-0 ml-2">
+
+        {/* Issues panel toggle — only visible when issues exist */}
+        {logicalIssues.length > 0 && (
+          <button
+            onClick={() => setShowIssues(!showIssues)}
+            className={`p-1.5 rounded-lg ${darkMode ? "text-neutral-400 hover:text-neutral-200 hover:bg-white/10" : "text-neutral-500 hover:text-neutral-700 hover:bg-black/5"}`}
+            style={{ transition: "all 0.2s ease" }}
+            title={showIssues ? "Hide Logical Issues" : "Show Logical Issues"}
+          >
+            {showIssues ? (
+              <PanelLeftClose className="w-4.5 h-4.5" />
+            ) : (
+              <PanelLeftOpen className="w-4.5 h-4.5" />
+            )}
+          </button>
+        )}
+
+        {/* Logical Check button */}
+        <button
+          onClick={handleLogicCheck}
+          disabled={checkLogic}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white shadow-sm"
+          style={{
+            background: checkLogic
+              ? "#75716f"
+              : "linear-gradient(135deg, #dd350c, #f56744)",
+            opacity: checkLogic ? 0.7 : 1,
+            transition: "opacity 0.2s ease, transform 0.15s ease",
+          }}
+          onMouseEnter={(e) =>
+            !checkLogic && (e.currentTarget.style.transform = "scale(1.03)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.transform = "scale(1)")
+          }
+        >
+          {checkLogic ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : null}
+          {checkLogic ? "Checking…" : "! Logical Check"}
+        </button>
+
+        {/* Download button */}
+        <button
+          onClick={() => exportTodocx()}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white shadow-sm"
+          style={{
+            background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+            transition: "opacity 0.2s ease, transform 0.15s ease",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.transform = "scale(1.03)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.transform = "scale(1)")
+          }
+        >
+          Download
+        </button>
+
+        {/* Summarize button */}
+        <button
+          onClick={Summarizeit}
+          disabled={isSummarizing}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white shadow-sm"
+          style={{
+            background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+            opacity: isSummarizing ? 0.7 : 1,
+            transition: "opacity 0.2s ease, transform 0.15s ease",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.transform = "scale(1.03)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.transform = "scale(1)")
+          }
+        >
+          {isSummarizing ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Sparkles className="w-3.5 h-3.5" />
+          )}
+          {isSummarizing ? "Summarizing…" : "Summarize"}
+        </button>
+
+        {/* Theme toggle */}
+        <button
+          onClick={() => setDarkMode(!darkMode)}
+          className={`p-1.5 rounded-lg ${darkMode ? "text-neutral-400 hover:text-neutral-200 hover:bg-white/10" : "text-neutral-500 hover:text-neutral-700 hover:bg-black/5"}`}
+          style={{ transition: "all 0.2s ease" }}
+          title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          {darkMode ? (
+            <Sun className="w-4.5 h-4.5" />
+          ) : (
+            <Moon className="w-4.5 h-4.5" />
+          )}
+        </button>
+
+        {/* Summary panel toggle */}
+        <button
+          onClick={() => setShowSummary(!showSummary)}
+          className={`p-1.5 rounded-lg ${darkMode ? "text-neutral-400 hover:text-neutral-200 hover:bg-white/10" : "text-neutral-500 hover:text-neutral-700 hover:bg-black/5"}`}
+          style={{ transition: "all 0.2s ease" }}
+          title={showSummary ? "Hide AI Summary" : "Show AI Summary"}
+        >
+          {showSummary ? (
+            <PanelRightClose className="w-4.5 h-4.5" />
+          ) : (
+            <PanelRightOpen className="w-4.5 h-4.5" />
+          )}
+        </button>
+      </div>
+    </div>
+
+    {/* ── Content area (issues panel + editor + summary side-by-side) ── */}
+    <div className="flex flex-1 min-h-0 p-4 gap-4">
+
+      {/* Logical Issues panel — slides in/out from LEFT */}
+      <div
+        style={{
+          width: showIssues ? "340px" : "0px",
+          minWidth: showIssues ? "340px" : "0px",
+          opacity: showIssues ? 1 : 0,
+          padding: showIssues ? undefined : "0",
+          overflow: "hidden",
+          transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+          borderRadius: "12px",
+          background: showIssues ? summaryPanelBg : "transparent",
+          boxShadow: showIssues ? summaryPanelShadow : "none",
+        }}
+      >
+        <div
+          className="h-full flex flex-col"
+          style={{
+            opacity: showIssues ? 1 : 0,
+            transform: showIssues ? "translateX(0)" : "translateX(-20px)",
+            transition: "opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s",
+          }}
+        >
+          {/* Issues header */}
           <div
+            className="flex items-center gap-2 px-4 py-3 border-b shrink-0"
             style={{
-              width: showIssues ? "340px" : "0px",
-              minWidth: showIssues ? "340px" : "0px",
-              opacity: showIssues ? 1 : 0,
-              padding: showIssues ? undefined : "0",
-              overflow: "hidden",
-              transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
-              borderRadius: "12px",
-              background: showIssues ? summaryPanelBg : "transparent",
-              boxShadow: showIssues ? summaryPanelShadow : "none",
+              borderColor: summaryBorder,
+              transition: "border-color 0.4s ease",
             }}
           >
-            <div
-              className="h-full flex flex-col"
-              style={{
-                opacity: showIssues ? 1 : 0,
-                transform: showIssues ? "translateX(0)" : "translateX(-20px)",
-                transition: "opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s",
-              }}
+            <AlertCircle className="w-4 h-4" style={{ color: "#ef4444" }} />
+            <span
+              className={`text-sm font-semibold ${textPrimary}`}
+              style={{ transition: "color 0.3s ease" }}
             >
-              {/* Issues header */}
-              <div
-                className="flex items-center gap-2 px-4 py-3 border-b shrink-0"
-                style={{
-                  borderColor: summaryBorder,
-                  transition: "border-color 0.4s ease",
-                }}
-              >
-                <AlertCircle className="w-4 h-4" style={{ color: "#ef4444" }} />
-                <span
-                  className={`text-sm font-semibold ${textPrimary}`}
-                  style={{ transition: "color 0.3s ease" }}
-                >
-                  Logical Issues ({logicalIssues.length})
-                </span>
-              </div>
-
-              {/* Issues content */}
-              <div 
-                className="flex-1 overflow-y-auto px-4 py-3"
-                style={{
-                  scrollbarWidth: "thin",
-                  scrollbarColor: darkMode ? "#4b5563 #1f2937" : "#d1d5db #f3f4f6",
-                }}
-              >
-                {logicalIssues.length > 0 ? (
-                  <div className="space-y-3">
-                    {logicalIssues.map((issue, index) => (
-                      <div
-                        key={index}
-                        className={`p-3 rounded-lg border ${
-                          darkMode
-                            ? "bg-red-950/20 border-red-900/30"
-                            : "bg-red-50 border-red-200"
-                        }`}
-                        style={{
-                          transition: "all 0.2s ease",
-                        }}
-                      >
-                        <div
-                          className={`text-xs font-semibold mb-1.5 ${
-                            darkMode ? "text-red-400" : "text-red-600"
-                          }`}
-                        >
-                          Issue {index + 1}
-                        </div>
-                        <div
-                          className={`text-sm mb-2 font-medium ${
-                            darkMode ? "text-neutral-200" : "text-neutral-800"
-                          }`}
-                        >
-                          {issue.text}
-                        </div>
-                        <div
-                          className={`text-xs leading-relaxed ${
-                            darkMode ? "text-neutral-400" : "text-neutral-600"
-                          }`}
-                        >
-                          → {issue.description}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div
-                    className={`flex flex-col items-center justify-center h-full text-center px-2 ${textMuted}`}
-                  >
-                    <AlertCircle className="w-8 h-8 mb-3 opacity-30" />
-                    <p className="text-sm">
-                      No logical issues found. Click{" "}
-                      <span className={`font-medium ${textSecondary}`}>
-                        Logical Check
-                      </span>{" "}
-                      to analyze your document.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
+              Logical Issues ({logicalIssues.length})
+            </span>
           </div>
 
-          {/* Editor panel — A4 page preview */}
+          {/* Issues content */}
           <div
-            className="flex-1 min-w-0 flex flex-col items-center  "
-            style={{
-              background: panelBg,
-              borderRadius: "12px",
-              transition: "background 0.4s ease",
-              padding: "clamp(16px, 3vw, 48px) clamp(8px, 2vw, 32px)",
-            }}
+            className="flex-1 overflow-y-auto scrollbar-hide px-4 py-3"
           >
-            {/* White A4 page */}
-            <div
-              style={{
-                width: "100%",
-                maxWidth: "794px",
-                background: "#f8f9fb",
-                borderRadius: "8px",
-                boxShadow: pageShadow,
-                fontSize: "clamp(0.85rem, 1.1vw, 1.05rem)",
-                lineHeight: "1.7",
-                padding: "clamp(32px, 5vw, 72px) clamp(24px, 4vw, 64px)",
-                transition: "box-shadow 0.4s ease",
-              }}
-            >
-              <EditorContext.Provider value={{ editor }}>
-                <TableHandle />
-                <TableSelectionOverlay
-                  showResizeHandles={true}
-                  cellMenu={(props) => (
-                    <TableCellHandleMenu
-                      editor={props.editor}
-                      onMouseDown={(e) => props.onResizeStart?.("br")(e)}
-                    />
-                  )}
+            {logicalIssues.length > 0 ? (
+              <div className="space-y-3">
+                {logicalIssues.map((issue, index) => (
+                  <div
+                    key={index}
+                    className={`p-3 rounded-lg border ${
+                      darkMode
+                        ? "bg-red-950/20 border-red-900/30"
+                        : "bg-red-50 border-red-200"
+                    }`}
+                    style={{ transition: "all 0.2s ease" }}
+                  >
+                    <div
+                      className={`text-xs font-semibold mb-1.5 ${
+                        darkMode ? "text-red-400" : "text-red-600"
+                      }`}
+                    >
+                      Issue {index + 1}
+                    </div>
+                    <div
+                      className={`text-sm mb-2 font-medium ${
+                        darkMode ? "text-neutral-200" : "text-neutral-800"
+                      }`}
+                    >
+                      {issue.text}
+                    </div>
+                    <div
+                      className={`text-xs leading-relaxed ${
+                        darkMode ? "text-neutral-400" : "text-neutral-600"
+                      }`}
+                    >
+                      → {issue.description}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div
+                className={`flex flex-col items-center justify-center h-full text-center px-2 ${textMuted}`}
+              >
+                <AlertCircle className="w-8 h-8 mb-3 opacity-30" />
+                <p className="text-sm">
+                  No logical issues found. Click{" "}
+                  <span className={`font-medium ${textSecondary}`}>
+                    Logical Check
+                  </span>{" "}
+                  to analyze your document.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Editor panel — A4 page preview */}
+      <div
+        className="flex-1 min-w-0 flex flex-col items-center overflow-y-auto scrollbar-hide"
+        style={{
+          background: panelBg,
+          borderRadius: "12px",
+          transition: "background 0.4s ease",
+          padding: "clamp(16px, 3vw, 48px) clamp(8px, 2vw, 32px)",
+        }}
+      >
+        {/* White A4 page */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "794px",
+            background: "#ffffff",
+            borderRadius: "8px",
+            boxShadow: pageShadow,
+            fontSize: "clamp(0.85rem, 0.4vw, 1.05rem)",
+            lineHeight: "1.7",
+            padding: "clamp(32px, 5vw, 72px) clamp(24px, 4vw, 64px)",
+            transition: "box-shadow 0.4s ease",
+          }}
+        >
+          <EditorContext.Provider value={{ editor }}>
+            <TableHandle />
+            <TableSelectionOverlay
+              showResizeHandles={true}
+              cellMenu={(props) => (
+                <TableCellHandleMenu
+                  editor={props.editor}
+                  onMouseDown={(e) => props.onResizeStart?.("br")(e)}
                 />
-                <TableExtendRowColumnButtons />
+              )}
+            />
+            <TableExtendRowColumnButtons />
 
-                <EditorContent
-                  editor={editor}
-                  role="presentation"
-                  className="control-showcase"
-                >
-                  <AiMenu />
-                </EditorContent>
-              </EditorContext.Provider>
-            </div>
-          </div>
+            <EditorContent
+              editor={editor}
+              role="presentation"
+              className="control-showcase"
+            >
+              <AiMenu />
+            </EditorContent>
+          </EditorContext.Provider>
+        </div>
+      </div>
 
-          {/* AI Summary panel — slides in/out */}
+      {/* AI Summary panel — slides in/out from RIGHT */}
+      <div
+        style={{
+          width: showSummary ? "340px" : "0px",
+          minWidth: showSummary ? "340px" : "0px",
+          opacity: showSummary ? 1 : 0,
+          padding: showSummary ? undefined : "0",
+          overflow: "hidden",
+          transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+          borderRadius: "12px",
+          background: showSummary ? summaryPanelBg : "transparent",
+          boxShadow: showSummary ? summaryPanelShadow : "none",
+        }}
+      >
+        <div
+          className="h-full flex flex-col"
+          style={{
+            opacity: showSummary ? 1 : 0,
+            transform: showSummary ? "translateX(0)" : "translateX(20px)",
+            transition: "opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s",
+          }}
+        >
+          {/* Summary header */}
           <div
+            className="flex items-center gap-2 px-4 py-3 border-b shrink-0"
             style={{
-              width: showSummary ? "340px" : "0px",
-              minWidth: showSummary ? "340px" : "0px",
-              opacity: showSummary ? 1 : 0,
-              padding: showSummary ? undefined : "0",
-              overflow: "hidden",
-              transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
-              borderRadius: "12px",
-              background: showSummary ? summaryPanelBg : "transparent",
-              boxShadow: showSummary ? summaryPanelShadow : "none",
+              borderColor: summaryBorder,
+              transition: "border-color 0.4s ease",
             }}
           >
-            <div
-              className="h-full flex flex-col"
-              style={{
-                opacity: showSummary ? 1 : 0,
-                transform: showSummary ? "translateX(0)" : "translateX(20px)",
-                transition: "opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s",
-              }}
+            <Sparkles className="w-4 h-4" style={{ color: "#a78bfa" }} />
+            <span
+              className={`text-sm font-semibold ${textPrimary}`}
+              style={{ transition: "color 0.3s ease" }}
             >
-              {/* Summary header */}
-              <div
-                className="flex items-center gap-2 px-4 py-3 border-b shrink-0"
-                style={{
-                  borderColor: summaryBorder,
-                  transition: "border-color 0.4s ease",
-                }}
-              >
-                <Sparkles className="w-4 h-4" style={{ color: "#a78bfa" }} />
-                <span
-                  className={`text-sm font-semibold ${textPrimary}`}
-                  style={{ transition: "color 0.3s ease" }}
-                >
-                  AI Summary
-                </span>
-              </div>
+              AI Summary
+            </span>
+          </div>
 
-              {/* Summary content */}
-              <div className="flex-1 overflow-y-auto scrollbar-hide px-4 py-3">
-                {isSummarizing ? (
-                  <div
-                    className={`flex flex-col items-center justify-center h-full gap-3 ${textMuted}`}
-                  >
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                    <span className="text-sm">Generating summary…</span>
-                  </div>
-                ) : summarizerContent ? (
-                  <p
-                    className={`text-sm leading-relaxed whitespace-pre-wrap ${textPrimary}`}
-                    style={{ transition: "color 0.3s ease" }}
-                  >
-                    {summarizerContent}
-                  </p>
-                ) : (
-                  <div
-                    className={`flex flex-col items-center justify-center h-full text-center px-2 ${textMuted}`}
-                  >
-                    <Sparkles className="w-8 h-8 mb-3 opacity-30" />
-                    <p className="text-sm">
-                      Click{" "}
-                      <span className={`font-medium ${textSecondary}`}>
-                        Summarize
-                      </span>{" "}
-                      to generate an AI summary of your document.
-                    </p>
-                  </div>
-                )}
+          {/* Summary content */}
+          <div className="flex-1 overflow-y-auto scrollbar-hide px-4 py-3">
+            {isSummarizing ? (
+              <div
+                className={`flex flex-col items-center justify-center h-full gap-3 ${textMuted}`}
+              >
+                <Loader2 className="w-6 h-6 animate-spin" />
+                <span className="text-sm">Generating summary…</span>
               </div>
-            </div>
+            ) : summarizerContent ? (
+              <p
+                className={`text-sm leading-relaxed whitespace-pre-wrap ${textPrimary}`}
+                style={{ transition: "color 0.3s ease" }}
+              >
+                {summarizerContent}
+              </p>
+            ) : (
+              <div
+                className={`flex flex-col items-center justify-center h-full text-center px-2 ${textMuted}`}
+              >
+                <Sparkles className="w-8 h-8 mb-3 opacity-30" />
+                <p className="text-sm">
+                  Click{" "}
+                  <span className={`font-medium ${textSecondary}`}>
+                    Summarize
+                  </span>{" "}
+                  to generate an AI summary of your document.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
   );
 };
 
