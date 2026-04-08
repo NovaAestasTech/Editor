@@ -12,19 +12,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const fullPrompt = `You are a logical analysis assistant. Analyze the given text for logical inconsistencies, contradictions, or flawed reasoning.
+    const fullPrompt = `You are a logical and lexical analysis assistant. Analyze the given text for:
 
-Return your analysis as a valid JSON array of objects. Each object should have:
-- "text": a brief quote or reference to the inconsistent statement
-- "description": explanation of the logical issue
+1. Logical inconsistencies, contradictions, or flawed reasoning.
+2. Lexical issues such as incorrect tense, ambiguous phrasing, inconsistent or impossible dates/timelines, and grammatical errors that affect meaning.
 
-If there are no logical issues, return an empty array: []
+Return your analysis as a valid JSON array of objects.
+
+Each object should have:
+- "text": a brief quote or reference to the problematic statement
+- "description": explanation of the issue (logical or lexical)
+
+If there are no issues, return an empty array: []
 
 Example format:
 [
   {
     "text": "The company grew by 50% while revenue decreased",
-    "description": "Contradiction: Growth typically correlates with revenue increase, not decrease"
+    "description": "Logical contradiction: Growth typically correlates with revenue increase, not decrease"
+  },
+  {
+    "text": "scheduled to kick off on the 15th august last year",
+    "description": "Lexical/temporal inconsistency: 'upcoming project' conflicts with 'last year'"
   }
 ]
 
