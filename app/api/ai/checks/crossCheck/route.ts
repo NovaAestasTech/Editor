@@ -34,7 +34,16 @@ Example format:
   }
 ]
 
-IMPORTANT: Return ONLY the JSON array, no additional text or explanation.
+Output format:
+Return ONLY a JSON array.
+
+Each object:
+{
+  "text": "...",
+  "description": "..."
+}
+
+If no issues exist, return: []
 
 Text to analyze:
 ${docText}`;
@@ -55,8 +64,8 @@ ${docText}`;
             content: fullPrompt,
           },
         ],
-        temperature: 0.3,
-        top_p: 0.8,
+        temperature: 0.1,
+        top_p: 1,
         max_tokens: 2048,
       }),
     });
