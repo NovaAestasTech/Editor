@@ -6,10 +6,7 @@ export async function POST(request: NextRequest) {
     const docText = body.content || "";
 
     if (!docText || docText.trim().length === 0) {
-      return NextResponse.json(
-        { statements: [] },
-        { status: 200 }
-      );
+      return NextResponse.json({ statements: [] }, { status: 200 });
     }
 
     const fullPrompt = `You are a logical and lexical analysis assistant. Analyze the given text for:
@@ -42,35 +39,31 @@ IMPORTANT: Return ONLY the JSON array, no additional text or explanation.
 Text to analyze:
 ${docText}`;
 
+    const groqUrl = "https://api.groq.com/openai/v1/chat/completions";
 
-    // Call Gemini API using gemini-2.5-flash (fast and capable)
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
-
-    const response = await fetch(geminiUrl, {
+    const response = await fetch(groqUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        contents: [
+        model: "openai/gpt-oss-120b",
+        messages: [
           {
-            parts: [
-              {
-                text: fullPrompt,
-              },
-            ],
+            role: "user",
+            content: fullPrompt,
           },
         ],
-        generationConfig: {
-          temperature: 0.3,
-          topP: 0.8,
-          maxOutputTokens: 2048,
-        },
+        temperature: 0.3,
+        top_p: 0.8,
+        max_tokens: 2048,
       }),
     });
 
     if (!response.ok) {
-      console.error("Gemini API error:", response.status);
+      const errorText = await response.text();
+      console.error("Groq API error:", response.status, errorText);
       return NextResponse.json(
         { error: "Failed to analyze content", statements: [] },
         { status: 500 }
@@ -78,34 +71,30 @@ ${docText}`;
     }
 
     const data = await response.json();
-    
-    // Extract the text from Gemini's response
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-    
-    // Clean up the response - remove markdown code blocks if present
+
+    const generatedText =
+      data.choices?.[0]?.message?.content?.trim?.() || "[]";
+
     let cleanedText = generatedText.trim();
+
     if (cleanedText.startsWith("```json")) {
       cleanedText = cleanedText.replace(/```json\n?/g, "").replace(/```\n?/g, "");
     } else if (cleanedText.startsWith("```")) {
       cleanedText = cleanedText.replace(/```\n?/g, "");
     }
-    
-    // Parse the JSON response
-    let statements = [];
+
+    let statements: any[] = [];
     try {
       statements = JSON.parse(cleanedText);
       if (!Array.isArray(statements)) {
         statements = [];
       }
     } catch (parseError) {
-      console.error("Failed to parse Gemini response:", cleanedText);
+      console.error("Failed to parse Groq response:", cleanedText);
       statements = [];
     }
 
-    return NextResponse.json(
-      { statements },
-      { status: 200 }
-    );
+    return NextResponse.json({ statements }, { status: 200 });
   } catch (error) {
     console.error("Error in cross-check endpoint:", error);
     return NextResponse.json(
