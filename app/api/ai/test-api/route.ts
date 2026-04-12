@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { tempStore } from "@/app/lib/tempStore";
+import { tempStore, authStore } from "@/app/lib/tempStore";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -18,6 +19,8 @@ export async function POST(request: Request) {
     const data = await request.json();
     tempStore.content = data.content;
 
+    tempStore.role = data.role;
+
     return new NextResponse(JSON.stringify({ status: "ok" }), {
       status: 200,
       headers: corsHeaders,
@@ -31,5 +34,8 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
-  return NextResponse.json({ content: tempStore.content });
+  return NextResponse.json({
+    content: tempStore.content,
+    role: tempStore.role,
+  });
 }
