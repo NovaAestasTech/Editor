@@ -49,7 +49,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { LogicalIssue } from "@/components/tiptap-extension/logical-issue-extension";
-import { tempStore } from "@/app/lib/tempStore";
+
 export const AiMenuExample = () => {
   return (
     <AiProvider>
