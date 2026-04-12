@@ -175,10 +175,15 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
           return false;
         },
       },
-      editable: role === "edit",
+      editable: false,
     },
     [initialContent],
   );
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(role === "edit");
+    }
+  }, [editor, role]);
 
   if (isLoading || !editor) {
     return (
