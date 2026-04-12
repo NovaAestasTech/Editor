@@ -1,1 +1,4 @@
-export const tempStore: { content: string | "" } = { content: "" };
+export const tempStore: { content: string | ""; role: string | "" } = {
+  content: "",
+  role: "",
+};
