@@ -49,7 +49,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { LogicalIssue } from "@/components/tiptap-extension/logical-issue-extension";
-
+import { tempStore } from "@/app/lib/tempStore";
 export const AiMenuExample = () => {
   return (
     <AiProvider>
@@ -79,7 +79,7 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
   
   const [logicalIssues, setLogicalIssues] = useState<Array<{ text: string; description: string }>>([]);
   const [showIssues, setShowIssues] = useState(false);
-
+  const [role, setrole] = useState("");
   // Sync dark class on <html> for tiptap button dark mode support
   useEffect(() => {
     if (darkMode) {
@@ -95,6 +95,7 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
         const res = await fetch("/api/ai/test-api");
         const data = await res.json();
         setInitialContent(data.content);
+        setrole(data.role);
       } catch (err) {
         console.log(err);
 
@@ -103,6 +104,7 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
         setIsLoading(false);
       }
     }
+
     loadContent();
   }, []);
 
@@ -173,7 +175,7 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
           return false;
         },
       },
-      editable: true,
+      editable: role === "edit",
     },
     [initialContent],
   );
