@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { tempStore, authStore } from "@/app/lib/tempStore";
+import { tempStore } from "@/app/lib/tempStore";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
