@@ -20,6 +20,8 @@ export async function POST(request: Request) {
     tempStore.content = data.content;
 
     tempStore.role = data.role;
+    tempStore.documentId = data.documentId || "";
+    tempStore.userId = data.userId || "";
 
     return new NextResponse(JSON.stringify({ status: "ok" }), {
       status: 200,
@@ -37,5 +39,7 @@ export async function GET() {
   return NextResponse.json({
     content: tempStore.content,
     role: tempStore.role,
+    documentId: tempStore.documentId,
+    userId: tempStore.userId,
   });
 }

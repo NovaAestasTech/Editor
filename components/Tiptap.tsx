@@ -76,6 +76,7 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
   const [showSummary, setShowSummary] = useState(false);
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
+  const [documentId, setDocumentId] = useState("");
   
   const [logicalIssues, setLogicalIssues] = useState<Array<{ text: string; description: string }>>([]);
   const [showIssues, setShowIssues] = useState(false);
@@ -96,6 +97,7 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
         const data = await res.json();
         setInitialContent(data.content);
         setrole(data.role);
+        setDocumentId(data.documentId || "");
       } catch (err) {
         console.log(err);
 
@@ -335,6 +337,34 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
     }
   };
 
+  const handleSave = async () => {
+    const htmlContent = generateHTML(editor.getJSON(), tiptapExtensionsServer);
+    try {
+      if (!documentId) {
+        console.error("Missing documentId. Cannot save document.");
+        return;
+      }
+
+      const res = await fetch("/api/ai/save-document", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          documentId,
+          content: htmlContent,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        console.error("Failed to save document:", data);
+      }
+    } catch (error) {
+      console.error("Error saving document:", error);
+    }
+  }
+  
   const exportTodocx = async () => {
     try {
       const html = generateHTML(editor.getJSON(), tiptapExtensionsServer);
@@ -494,6 +524,16 @@ const Tiptap = ({ aiToken }: { aiToken: string }) => {
             )}
           </button>
         )}
+
+        <button
+          className="p-2 rounded-md hover:bg-white/5 transition duration-200 ease-in-out cursor-pointer active:bg-white/10"
+          onClick={handleSave}
+        > 
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke={darkMode ? "#e5e7eb" : "#374151"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-file-text w-4.5 h-4.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z" />
+            <polyline points="14,2 14,8 20,8" />
+          </svg>
+        </button>
 
         {/* Logical Check button */}
         <button
